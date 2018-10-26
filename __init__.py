@@ -35,6 +35,7 @@ __all__ = [
     'importing',
     'minimizing',
     'modelling',
+    'morphing',
     'moving',
     'msms',
     'nma',
