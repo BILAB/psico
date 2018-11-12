@@ -58,7 +58,7 @@ SEE ALSO
 def gyradius(selection='(all)', state=-1, quiet=1):
     '''
 DESCRIPTION
- 
+
     Radius of gyration
 
     Based on: http://pymolwiki.org/index.php/Radius_of_gyration
@@ -97,9 +97,9 @@ DESCRIPTION
     API only function. Returns a dictionary with items
 
         (object name, Nx3 coords list)
- 
+
     N is the number of alignment columns without gaps.
- 
+
 EXAMPLE
 
     import numpy
@@ -242,12 +242,12 @@ SEE ALSO
         print(' get_sasa_mmtk: %.3f Angstroms^2 (volume: %.3f Angstroms^3).' % (area * 1e2, volume * 1e3))
     return area * 1e2
 
-def get_raw_distances(names='', state=1, selection='all', quiet=1):
+def get_raw_distances(names='', state=1, selection='all', label='ID', amber=0, quiet=1):
     '''
 DESCRIPTION
 
     Get the list of pair items from distance objects. Each list item is a
-    tuple of (index1, index2, distance).
+    tuple of (ID1, ID2, distance).
 
     Based on a script from Takanori Nakane, posted on pymol-users mailing list.
     http://www.mail-archive.com/pymol-users@lists.sourceforge.net/msg10143.html
@@ -260,6 +260,10 @@ ARGUMENTS
     state = integer: object state {default: 1}
 
     selection = string: atom selection {default: all}
+
+    label = string: label type ('ID' or 'index') {default: ID}
+
+    amber = integer: generate amber rst file {default: 0}
 
 SEE ALSO
 
@@ -283,7 +287,7 @@ SEE ALSO
     raw_objects = cmd.get_session(names, 1, 1, 0, 0)['names']
 
     xyz2idx = {}
-    cmd.iterate_state(state, selection, 'xyz2idx[x,y,z] = (model,index)',
+    cmd.iterate_state(state, selection, 'xyz2idx[x,y,z] = (model, resi, resn, name, '+label+')',
             space=locals())
 
     r = []
@@ -304,6 +308,21 @@ SEE ALSO
             except KeyError:
                 if quiet < 0:
                     print(' Debug: no index for %s %s' % (xyz1, xyz2))
+    # print(r)
+    # for generate amber MD restraint file.
+    if(amber):
+        for i in r:
+            print("""# {0}{1}  {2} - {3}{4}  {5}
+&rst
+   iat={6}, {7},
+   r1=0, r2=2.8,
+   r3={8:.2f}, r4=8,
+   rk2=2.0, rk3=2.0,
+/
+""".format(str(i[0][1]), str(i[0][2]), str(i[0][3]),
+           str(i[1][1]), str(i[1][2]), str(i[1][3]),
+           str(i[0][4]), str(i[1][4]),
+           float(i[2])))
     return r
 
 def get_color(selection, which=0, mode=0):
@@ -398,7 +417,7 @@ def get_coords(selection, state=-1):
 DESCRIPTION
 
     API only. Returns the (natoms, 3) coordinate matrix for a given state.
-    Considers the object rotation matrix. 
+    Considers the object rotation matrix.
     '''
     if state < 0:
         state = get_selection_state(selection)
@@ -409,7 +428,7 @@ def get_ensemble_coords(selection):
 DESCRIPTION
 
     API only. Returns the (nstates, natoms, 3) coordinate matrix. Considers
-    the object rotation matrix. 
+    the object rotation matrix.
     '''
     return [get_coords(selection, state)
             for state in range(1, cmd.count_states(selection) + 1)]
