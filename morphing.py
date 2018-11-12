@@ -21,7 +21,7 @@ USAGE
 
 EXAMPLE
 
-    fetch 1akeA 4akeA, bsync=0
+    fetch 1akeA 4akeA, async=0
     extra_fit
     morpheasy 1akeA, 4akeA
     '''
@@ -85,7 +85,7 @@ EXAMPLE
     # morph
     if name is None:
         name = cmd.get_unused_name('morph')
-    rigimol.morph(so_obj, name, refinement=refinement, bsync=0)
+    rigimol.morph(so_obj, name, refinement=refinement)
 
     # clean up
     for obj in [alnobj, so_obj, so_sel, ta_obj, ta_sel]:
