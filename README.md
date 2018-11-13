@@ -46,7 +46,38 @@ yum install dssp
 
 でいけます。もし`mkdssp`をこれら以外の方法で`/usr/bin/`または`/usr/local/bin`以外のPATHにインストールした場合には、引数`exe`の部分にPATHを設定してあげてください。
 
-<img src="./img/dssp.png" width="600px">
+<img src="img/dssp.png" width="600px"></img>
+
+## AMBER, GROMACS用距離拘束入力補助 ##
+
+PyMOLでMDシミュレーションを眺めながら、「この原子とこの原子の間に距離拘束をかけたいな〜。でも、いちいち原子のIDを調べてポチポチ手入力するの面倒なんだよなあ。入力ミスも多いし、なんとかならないかな〜？」
+そんなあなたにこの`get_raw_distances`コマンドがおすすめ（`querying.py`の中に関数定義してあります）！使い方は、まずCtrl+ホイールクリックを使って、distanceオブジェクトを生成した後、PyMOLの画面から
+
+```
+get_raw_distances dist01, amber=1(, gro=1)
+```
+
+のコマンドを入力すれば、`dist01`オブジェクトで結んだ2点間の距離拘束命令を書き出してくれます！
+
+```
+PyMOL>get_raw_distances dist01, amber=1
+ get_raw_distances: (('1alkA', '100', 'THR', 'O', 735), ('1alkA', '412', 'HIS', 'ND1', 3027), 2.8963856608242353)
+# 100THR  O - 412HIS  ND1
+&rst
+   iat=735, 3027,
+   r1=0, r2=0.5,
+   r3=2.90, r4=8,
+   rk2=2.0, rk3=2.0,
+/
+
+PyMOL>get_raw_distances dist01, gro=1
+ get_raw_distances: (('1alkA', '100', 'THR', 'O', 735), ('1alkA', '412', 'HIS', 'ND1', 3027), 2.8963856608242353)
+735 3027 10 0.00 0.290 0.800 1673 ; 100THR O - 412HIS ND1 2kcal/mol/A2
+```
+
+AMBERの距離拘束を書き出したいときは`amber=1`を、GROMACSの距離拘束を書き出したいときは`gro=1`を、それぞれ指定します。詳しい使い方は`help get_raw_distances`コマンドを参照。オブジェクト名の指定を省略すれば、全distanceオブジェクトを対象に一気に表示してくれます。
+
+![getrawdist.png](./img/getrawdist.png)
 
 ## contactmap.py ##
 
