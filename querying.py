@@ -242,7 +242,7 @@ SEE ALSO
         print(' get_sasa_mmtk: %.3f Angstroms^2 (volume: %.3f Angstroms^3).' % (area * 1e2, volume * 1e3))
     return area * 1e2
 
-def get_raw_distances(names='', state=1, selection='all', label='ID', amber=0, quiet=1):
+def get_raw_distances(names='', state=1, selection='all', amber=0, gro=0, label='ID', quiet=1):
     '''
 DESCRIPTION
 
@@ -261,9 +261,11 @@ ARGUMENTS
 
     selection = string: atom selection {default: all}
 
-    label = string: label type ('ID' or 'index') {default: ID}
+    amber = integer: generate AMBER rst file {default: 0}
 
-    amber = integer: generate amber rst file {default: 0}
+    gro = integer: generate GROMACS rst file {default: 0}
+
+    label = string: label type ('ID' or 'index') {default: ID}
 
 SEE ALSO
 
@@ -310,7 +312,7 @@ SEE ALSO
                     print(' Debug: no index for %s %s' % (xyz1, xyz2))
     # print(r)
     # for generate amber MD restraint file.
-    if(amber):
+    if(int(amber)):
         for i in r:
             print("""# {0}{1}  {2} - {3}{4}  {5}
 &rst
@@ -323,6 +325,15 @@ SEE ALSO
            str(i[1][1]), str(i[1][2]), str(i[1][3]),
            str(i[0][4]), str(i[1][4]),
            float(i[2])))
+
+    # for generate GROMACS MD restraint file.
+    if(int(gro)):
+        for i in r:
+            print("{6} {7} 10 0.00 {8:.3f} 0.800 1673 ; {0}{1} {2} - {3}{4} {5} 2kcal/mol/A2"
+                  .format(str(i[0][1]), str(i[0][2]), str(i[0][3]),
+                          str(i[1][1]), str(i[1][2]), str(i[1][3]),
+                          str(i[0][4]), str(i[1][4]), float(i[2])/10))
+
     return r
 
 def get_color(selection, which=0, mode=0):
