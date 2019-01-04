@@ -320,8 +320,7 @@ SEE ALSO
    r1=0, r2=0.5,
    r3={8:.2f}, r4=8,
    rk2=2.0, rk3=2.0,
-/
-""".format(str(i[0][1]), str(i[0][2]), str(i[0][3]),
+/""".format(str(i[0][1]), str(i[0][2]), str(i[0][3]),
            str(i[1][1]), str(i[1][2]), str(i[1][3]),
            str(i[0][4]), str(i[1][4]),
            float(i[2])))
