@@ -22,6 +22,7 @@ except:
 __all__ = [
     'aaindex',
     'contactmap',
+    'contactmap_yang',
     'conservation',
     'creating',
     'editing',
