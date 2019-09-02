@@ -242,6 +242,64 @@ SEE ALSO
         print(' get_sasa_mmtk: %.3f Angstroms^2 (volume: %.3f Angstroms^3).' % (area * 1e2, volume * 1e3))
     return area * 1e2
 
+def print_dihedrals(selection='sele', state=1, quiet=1, label='ID'):
+    '''
+DESCRIPTION
+
+    "print_dihedrals" return the phi, psi, and chi1 angles for a protein atom
+    selection.
+
+ARGUMENTS
+
+    state = integer: object state {default: 1}
+
+    selection = string: atom selection {default: all}
+
+    amber = integer: generate AMBER rst file {default: 1;ON}
+
+    label = string: label type ('ID' or 'index') {default: ID}
+
+SEE ALSO
+
+    phipsi
+    '''
+    index = {}
+    # どうやって残基ごとに分けてループを回すか？
+    n_sele =   "((byres (%s)) & name N)"%selection
+    c_sele =   "((byres (%s)) & name C)"%selection
+    ca_sele =  "((byres (%s)) & name CA)"%selection
+    cb_sele =  "((byres (%s)) & name CB)"%selection
+    cg_sele =  "((byres (%s)) & name CG)"%selection
+    cm_sele = "((neighbor (%s)) and not (byres (%s)))"%(n_sele,n_sele) #前の残基のC
+    np_sele = "((neighbor (%s)) and not (byres (%s)))"%(c_sele,c_sele) #次の残基のN
+    cmd.feedback("push")
+    cmd.feedback("disable","selector","everything")
+    cm_cnt = cmd.select("_pp_cm",cm_sele)
+    n_cnt = cmd.select("_pp_n",n_sele)
+    c_cnt = cmd.select("_pp_c",c_sele)
+    ca_cnt = cmd.select("_pp_ca",ca_sele)
+    cb_cnt = cmd.select("_pp_cb",cb_sele)
+    cg_cnt = cmd.select("_pp_cg",cg_sele)
+    np_cnt = cmd.select("_pp_np",np_sele)
+    if(cm_cnt and n_cnt and ca_cnt and c_cnt):
+        phi = cmd.get_dihedral("_pp_c","_pp_ca","_pp_n","_pp_cm")
+    else:
+        phi = None
+    if(n_cnt and ca_cnt and c_cnt and np_cnt):
+        psi = cmd.get_dihedral("_pp_np","_pp_c","_pp_ca","_pp_n")
+    else:
+        psi = None
+    if(n_cnt and ca_cnt and cb_cnt and cg_cnt):
+        chi1 = cmd.get_dihedral("_pp_cg","_pp_cb","_pp_ca","_pp_n")
+    else:
+        chi1 = None
+
+    print('phi='+str(phi))
+    print('psi='+str(psi))
+    print('chi1='+str(chi1))
+
+
+
 def get_raw_distances(names='', state=1, selection='all', amber=0, gro=0, label='ID', quiet=1):
     '''
 DESCRIPTION
@@ -319,7 +377,7 @@ SEE ALSO
    iat={6}, {7},
    r1=0, r2=0.5,
    r3={8:.2f}, r4=8,
-   rk2=2.0, rk3=2.0,
+   rk2=1.0, rk3=1.0,
 /""".format(str(i[0][1]), str(i[0][2]), str(i[0][3]),
            str(i[1][1]), str(i[1][2]), str(i[1][3]),
            str(i[0][4]), str(i[1][4]),
@@ -328,7 +386,7 @@ SEE ALSO
     # for generate GROMACS MD restraint file.
     if(int(gro)):
         for i in r:
-            print("{6} {7} 10 0.00 {8:.3f} 0.800 1673 ; {0}{1} {2} - {3}{4} {5} 2kcal/mol/A2"
+            print("{6} {7} 10 0.00 {8:.3f} 0.800 800 ; {0}{1} {2} - {3}{4} {5} 2kcal/mol/A2"
                   .format(str(i[0][1]), str(i[0][2]), str(i[0][3]),
                           str(i[1][1]), str(i[1][2]), str(i[1][3]),
                           str(i[0][4]), str(i[1][4]), float(i[2])/10))
@@ -450,6 +508,7 @@ cmd.extend('get_sasa', get_sasa)
 cmd.extend('get_sasa_ball', get_sasa_ball)
 cmd.extend('get_sasa_mmtk', get_sasa_mmtk)
 cmd.extend('get_raw_distances', get_raw_distances)
+cmd.extend('print_dihedrals', print_dihedrals)
 
 cmd.auto_arg[0].update([
     ('centerofmass', cmd.auto_arg[0]['zoom']),
