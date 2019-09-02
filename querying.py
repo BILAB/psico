@@ -281,6 +281,17 @@ SEE ALSO
     cb_cnt = cmd.select("_pp_cb",cb_sele)
     cg_cnt = cmd.select("_pp_cg",cg_sele)
     np_cnt = cmd.select("_pp_np",np_sele)
+    # 残基名＋残基番号取得(ASP704みたいな)
+    rname = []
+    cmd.iterate(n_sele, "rname.append(resn+resi)", space=locals())
+
+    atoms = []
+    strings = ["_pp_cm", "_pp_n", "_pp_c", "_pp_ca", "_pp_cb", "_pp_cg", "_pp_np"]
+    # Atom IDを入れたリストatoms = [["_pp_cm"], ["_pp_n"], ["_pp_c"], ["_pp_ca"], ["_pp_cb"], ["_pp_cg"], ["_pp_np"]]
+    for i in strings:
+        temp = cmd.identify(i)
+        atoms.append(temp[0])
+
     if(cm_cnt and n_cnt and ca_cnt and c_cnt):
         phi = cmd.get_dihedral("_pp_c","_pp_ca","_pp_n","_pp_cm")
     else:
@@ -294,11 +305,11 @@ SEE ALSO
     else:
         chi1 = None
 
-    print('phi='+str(phi))
-    print('psi='+str(psi))
-    print('chi1='+str(chi1))
-
-
+    if phi is not None:
+        print('''# {6}
+&rst iat=  {0},  {1},  {2},  {3}, r1=-180.0, r2={4:.2f}, r3={5:.2f}, r4= 180.0,
+rk2= 10, rk3= 10,\n/'''
+            .format(int(atoms[2]), int(atoms[3]), int(atoms[1]), int(atoms[0]), float(phi-10.0), float(phi+10.0), str(rname[0])))
 
 def get_raw_distances(names='', state=1, selection='all', amber=0, gro=0, label='ID', quiet=1):
     '''
