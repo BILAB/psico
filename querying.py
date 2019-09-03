@@ -263,53 +263,82 @@ SEE ALSO
 
     phipsi
     '''
-    index = {}
-    # どうやって残基ごとに分けてループを回すか？
-    n_sele =   "((byres (%s)) & name N)"%selection
-    c_sele =   "((byres (%s)) & name C)"%selection
-    ca_sele =  "((byres (%s)) & name CA)"%selection
-    cb_sele =  "((byres (%s)) & name CB)"%selection
-    cg_sele =  "((byres (%s)) & name CG)"%selection
-    cm_sele = "((neighbor (%s)) and not (byres (%s)))"%(n_sele,n_sele) #前の残基のC
-    np_sele = "((neighbor (%s)) and not (byres (%s)))"%(c_sele,c_sele) #次の残基のN
-    cmd.feedback("push")
-    cmd.feedback("disable","selector","everything")
-    cm_cnt = cmd.select("_pp_cm",cm_sele)
-    n_cnt = cmd.select("_pp_n",n_sele)
-    c_cnt = cmd.select("_pp_c",c_sele)
-    ca_cnt = cmd.select("_pp_ca",ca_sele)
-    cb_cnt = cmd.select("_pp_cb",cb_sele)
-    cg_cnt = cmd.select("_pp_cg",cg_sele)
-    np_cnt = cmd.select("_pp_np",np_sele)
-    # 残基名＋残基番号取得(ASP704みたいな)
-    rname = []
-    cmd.iterate(n_sele, "rname.append(resn+resi)", space=locals())
+    # selectionからCalpha原子のIDリストを取得
+    caindex = []
+    cmd.iterate('bycalpha (%s)'%selection, 'caindex.append(ID)', space=locals())
+    # Calpha原子が属する残基ごとに処理を行う
+    for ca in caindex:
+        # resinameに残基名のみ取得
+        n_sele =   "((byres ID %s) & name N)"%ca
+        c_sele =   "((byres ID %s) & name C)"%ca
+        ca_sele =  "((byres ID %s) & name CA)"%ca
+        cb_sele =  "((byres ID %s) & name CB)"%ca
 
-    atoms = []
-    strings = ["_pp_cm", "_pp_n", "_pp_c", "_pp_ca", "_pp_cb", "_pp_cg", "_pp_np"]
-    # Atom IDを入れたリストatoms = [["_pp_cm"], ["_pp_n"], ["_pp_c"], ["_pp_ca"], ["_pp_cb"], ["_pp_cg"], ["_pp_np"]]
-    for i in strings:
-        temp = cmd.identify(i)
-        atoms.append(temp[0])
+        resiname_sele = []
+        cmd.iterate(ca_sele, "resiname_sele.append(resn)", space=locals())
+        resiname = str(resiname_sele[0])
 
-    if(cm_cnt and n_cnt and ca_cnt and c_cnt):
-        phi = cmd.get_dihedral("_pp_c","_pp_ca","_pp_n","_pp_cm")
-    else:
-        phi = None
-    if(n_cnt and ca_cnt and c_cnt and np_cnt):
-        psi = cmd.get_dihedral("_pp_np","_pp_c","_pp_ca","_pp_n")
-    else:
-        psi = None
-    if(n_cnt and ca_cnt and cb_cnt and cg_cnt):
-        chi1 = cmd.get_dihedral("_pp_cg","_pp_cb","_pp_ca","_pp_n")
-    else:
-        chi1 = None
+        if resiname == 'ILE' or resiname == 'VAL':
+            cg_sele = "((byres ID %s) & name CG1)"%ca
+        elif resiname == 'THR':
+            cg_sele = "((byres ID %s) & name OG1)"%ca
+        elif resiname == 'CYS' or resiname == 'CYX':
+            cg_sele = "((byres ID %s) & name SG)"%ca
+        else:
+            cg_sele = "((byres ID %s) & name CG)"%ca
 
-    if phi is not None:
-        print('''# {6}
+        cm_sele = "((neighbor (%s)) and not (byres (%s)))"%(n_sele,n_sele) #前の残基のC
+        np_sele = "((neighbor (%s)) and not (byres (%s)))"%(c_sele,c_sele) #次の残基のN
+        cmd.feedback("push")
+        cmd.feedback("disable","selector","everything")
+        cm_cnt = cmd.select("_pp_cm",cm_sele)
+        n_cnt = cmd.select("_pp_n",n_sele)
+        c_cnt = cmd.select("_pp_c",c_sele)
+        ca_cnt = cmd.select("_pp_ca",ca_sele)
+        cb_cnt = cmd.select("_pp_cb",cb_sele)
+        cg_cnt = cmd.select("_pp_cg",cg_sele)
+        np_cnt = cmd.select("_pp_np",np_sele)
+        # 残基名＋残基番号取得(ASP704みたいな)
+        rname = []
+        cmd.iterate(ca_sele, "rname.append(resn+resi)", space=locals())
+
+        if(cm_cnt and n_cnt and ca_cnt and c_cnt):
+            phi = cmd.get_dihedral("_pp_c","_pp_ca","_pp_n","_pp_cm")
+        else:
+            phi = None
+        if(n_cnt and ca_cnt and c_cnt and np_cnt):
+            psi = cmd.get_dihedral("_pp_np","_pp_c","_pp_ca","_pp_n")
+        else:
+            psi = None
+        if(n_cnt and ca_cnt and cb_cnt and cg_cnt):
+            chi1 = cmd.get_dihedral("_pp_cg","_pp_cb","_pp_ca","_pp_n")
+        else:
+            chi1 = None
+
+        atomdict = {}
+        strings = ["_pp_cm", "_pp_n", "_pp_c", "_pp_ca", "_pp_cb", "_pp_np", "_pp_cg"]
+        for i in strings:
+            temp = cmd.identify(i)
+            # tempが空リストでなければatomdictに追加
+            if temp:
+                atomdict[i] = temp[0]
+
+        if phi is not None:
+            print('''# {6} phi
 &rst iat=  {0},  {1},  {2},  {3}, r1=-180.0, r2={4:.2f}, r3={5:.2f}, r4= 180.0,
-rk2= 10, rk3= 10,\n/'''
-            .format(int(atoms[2]), int(atoms[3]), int(atoms[1]), int(atoms[0]), float(phi-10.0), float(phi+10.0), str(rname[0])))
+rk2= 2.0, rk3= 2.0,\n/'''
+                .format(int(atomdict['_pp_c']), int(atomdict['_pp_ca']), int(atomdict['_pp_n']), int(atomdict['_pp_cm']), float(phi-10.0), float(phi+10.0), str(rname[0])))
+        if psi is not None:
+            print('''# {6} psi
+&rst iat=  {0},  {1},  {2},  {3}, r1=-180.0, r2={4:.2f}, r3={5:.2f}, r4= 180.0,
+rk2= 2.0, rk3= 2.0,\n/'''
+                .format(int(atomdict['_pp_np']), int(atomdict['_pp_c']), int(atomdict['_pp_ca']), int(atomdict['_pp_n']), float(psi-10.0), float(psi+10.0), str(rname[0])))
+        if chi1 is not None:
+            print('''# {6} chi1
+&rst iat=  {0},  {1},  {2},  {3}, r1=-180.0, r2={4:.2f}, r3={5:.2f}, r4= 180.0,
+rk2= 2.0, rk3= 2.0,\n/'''
+                .format(int(atomdict['_pp_cg']), int(atomdict['_pp_cb']), int(atomdict['_pp_ca']), int(atomdict['_pp_n']), float(chi1-10.0), float(chi1+10.0), str(rname[0])))
+
 
 def get_raw_distances(names='', state=1, selection='all', amber=0, gro=0, label='ID', quiet=1):
     '''
