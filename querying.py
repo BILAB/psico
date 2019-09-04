@@ -324,6 +324,8 @@ SEE ALSO
             if temp:
                 atomdict[i] = temp[0]
 
+        # phi, psi用に制限を設ける
+        # 引数でssが指定されている場合、その範囲になるよう設定
         def phir2limit(x, sigma, ss):
             if ss == '':
                 val = x - sigma
