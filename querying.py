@@ -390,19 +390,22 @@ SEE ALSO
 
         if phi is not None:
             print('''# {6} phi
-&rst iat=  {0},  {1},  {2},  {3}, r1=-180.0, r2={4:.2f}, r3={5:.2f}, r4= 180.0,
+&rst iat=  {0},  {1},  {2},  {3},
+r1=-180.0, r2={4:.2f}, r3={5:.2f}, r4= 180.0,
 rk2= 2.0, rk3= 2.0,\n/'''
                 .format(int(atomdict['_pp_c']), int(atomdict['_pp_ca']), int(atomdict['_pp_n']), int(atomdict['_pp_cm']),
                         phir2limit(phi, 10.0, ss), phir3limit(phi, 10.0, ss), str(rname[0])))
         if psi is not None:
             print('''# {6} psi
-&rst iat=  {0},  {1},  {2},  {3}, r1=-180.0, r2={4:.2f}, r3={5:.2f}, r4= 180.0,
+&rst iat=  {0},  {1},  {2},  {3},
+r1=-180.0, r2={4:.2f}, r3={5:.2f}, r4= 180.0,
 rk2= 2.0, rk3= 2.0,\n/'''
                 .format(int(atomdict['_pp_np']), int(atomdict['_pp_c']), int(atomdict['_pp_ca']), int(atomdict['_pp_n']),
                         psir2limit(psi, 10.0, ss), psir3limit(psi, 10.0, ss), str(rname[0])))
         if chi1 is not None:
             print('''# {6} chi1
-&rst iat=  {0},  {1},  {2},  {3}, r1=-180.0, r2={4:.2f}, r3={5:.2f}, r4= 180.0,
+&rst iat=  {0},  {1},  {2},  {3},
+r1=-180.0, r2={4:.2f}, r3={5:.2f}, r4= 180.0,
 rk2= 2.0, rk3= 2.0,\n/'''
                 .format(int(atomdict['_pp_cg']), int(atomdict['_pp_cb']), int(atomdict['_pp_ca']), int(atomdict['_pp_n']),
                         r2limit(chi1, 10.0), r3limit(chi1, 10.0), str(rname[0])))
