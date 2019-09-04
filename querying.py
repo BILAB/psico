@@ -242,7 +242,7 @@ SEE ALSO
         print(' get_sasa_mmtk: %.3f Angstroms^2 (volume: %.3f Angstroms^3).' % (area * 1e2, volume * 1e3))
     return area * 1e2
 
-def print_dihedrals(selection='sele', state=1, quiet=1, label='ID'):
+def print_dihedrals(selection='sele', state=1, quiet=1, ss='', label='ID'):
     '''
 DESCRIPTION
 
@@ -298,6 +298,7 @@ SEE ALSO
         cb_cnt = cmd.select("_pp_cb",cb_sele)
         cg_cnt = cmd.select("_pp_cg",cg_sele)
         np_cnt = cmd.select("_pp_np",np_sele)
+
         # 残基名＋残基番号取得(ASP704みたいな)
         rname = []
         cmd.iterate(ca_sele, "rname.append(resn+resi)", space=locals())
@@ -323,21 +324,88 @@ SEE ALSO
             if temp:
                 atomdict[i] = temp[0]
 
+        def phir2limit(x, sigma, ss):
+            if ss == '':
+                val = x - sigma
+                if val <= -180.0:
+                    val = -180.0
+                return val
+            elif ss == 'alpha':
+                val = -90.0
+                return val
+            elif ss == 'beta':
+                val = -180.0
+                return val
+
+        def phir3limit(x, sigma, ss):
+            if ss == '':
+                val = x + sigma
+                if val >= 180.0:
+                    val = 180.0
+                return val
+            elif ss == 'alpha':
+                val = -45.0
+                return val
+            elif ss == 'beta':
+                val = -90.0
+                return val
+
+        def psir2limit(x, sigma, ss):
+            if ss == '':
+                val = x - sigma
+                if val <= -180.0:
+                    val = -180.0
+                return val
+            elif ss == 'alpha':
+                val = -60.0
+                return val
+            elif ss == 'beta':
+                val = 90.0
+                return val
+
+        def psir3limit(x, sigma, ss):
+            if ss == '':
+                val = x + sigma
+                if val >= 180.0:
+                    val = 180.0
+                return val
+            elif ss == 'alpha':
+                val = -30.0
+                return val
+            elif ss == 'beta':
+                val = 180.0
+                return val
+
+        def r2limit(x, sigma):
+            val = x - sigma
+            if val <= -180.0:
+                val = -180.0
+            return val
+
+        def r3limit(x, sigma):
+            val = x + sigma
+            if val >= 180.0:
+                val = 180.0
+            return val
+
         if phi is not None:
             print('''# {6} phi
 &rst iat=  {0},  {1},  {2},  {3}, r1=-180.0, r2={4:.2f}, r3={5:.2f}, r4= 180.0,
 rk2= 2.0, rk3= 2.0,\n/'''
-                .format(int(atomdict['_pp_c']), int(atomdict['_pp_ca']), int(atomdict['_pp_n']), int(atomdict['_pp_cm']), float(phi-10.0), float(phi+10.0), str(rname[0])))
+                .format(int(atomdict['_pp_c']), int(atomdict['_pp_ca']), int(atomdict['_pp_n']), int(atomdict['_pp_cm']),
+                        phir2limit(phi, 10.0, ss), phir3limit(phi, 10.0, ss), str(rname[0])))
         if psi is not None:
             print('''# {6} psi
 &rst iat=  {0},  {1},  {2},  {3}, r1=-180.0, r2={4:.2f}, r3={5:.2f}, r4= 180.0,
 rk2= 2.0, rk3= 2.0,\n/'''
-                .format(int(atomdict['_pp_np']), int(atomdict['_pp_c']), int(atomdict['_pp_ca']), int(atomdict['_pp_n']), float(psi-10.0), float(psi+10.0), str(rname[0])))
+                .format(int(atomdict['_pp_np']), int(atomdict['_pp_c']), int(atomdict['_pp_ca']), int(atomdict['_pp_n']),
+                        psir2limit(psi, 10.0, ss), psir3limit(psi, 10.0, ss), str(rname[0])))
         if chi1 is not None:
             print('''# {6} chi1
 &rst iat=  {0},  {1},  {2},  {3}, r1=-180.0, r2={4:.2f}, r3={5:.2f}, r4= 180.0,
 rk2= 2.0, rk3= 2.0,\n/'''
-                .format(int(atomdict['_pp_cg']), int(atomdict['_pp_cb']), int(atomdict['_pp_ca']), int(atomdict['_pp_n']), float(chi1-10.0), float(chi1+10.0), str(rname[0])))
+                .format(int(atomdict['_pp_cg']), int(atomdict['_pp_cb']), int(atomdict['_pp_ca']), int(atomdict['_pp_n']),
+                        r2limit(chi1, 10.0), r3limit(chi1, 10.0), str(rname[0])))
 
 
 def get_raw_distances(names='', state=1, selection='all', amber=0, gro=0, label='ID', quiet=1):
