@@ -242,6 +242,30 @@ SEE ALSO
         print(' get_sasa_mmtk: %.3f Angstroms^2 (volume: %.3f Angstroms^3).' % (area * 1e2, volume * 1e3))
     return area * 1e2
 
+def sheetrestraint(selection='sele', state=1, quiet=1, ss='', label='ID'):
+    '''
+DESCRIPTION
+
+    "sheetrestraint" returns ...
+
+ARGUMENTS
+
+    state = integer: object state {default: 1}
+
+    s
+
+    '''
+    # selectionからCalpha原子のIDリストを取得
+    caindex = []
+    cmd.iterate('bycalpha (%s)'%selection, 'caindex.append(ID)', space=locals())
+    # Calpha原子が属する残基ごとに処理を行う
+    for ca in caindex:
+        # resinameに残基名のみ取得
+        n_sele =   "((byres ID %s) & name N)"%ca
+        o_sele =   "((byres ID %s) & name O)"%ca
+
+
+
 def print_dihedrals(selection='sele', state=1, quiet=1, ss='', label='ID'):
     '''
 DESCRIPTION
@@ -333,7 +357,7 @@ SEE ALSO
                     val = -180.0
                 return val
             elif ss == 'alpha':
-                val = -90.0
+                val = -100.0
                 return val
             elif ss == 'beta':
                 val = -180.0
@@ -372,7 +396,7 @@ SEE ALSO
                     val = 180.0
                 return val
             elif ss == 'alpha':
-                val = -30.0
+                val = -20.0
                 return val
             elif ss == 'beta':
                 val = 180.0
@@ -394,14 +418,14 @@ SEE ALSO
             print('''# {6} phi
 &rst iat=  {0},  {1},  {2},  {3},
 r1=-180.0, r2={4:.2f}, r3={5:.2f}, r4= 180.0,
-rk2= 2.0, rk3= 2.0,\n/'''
+rk2= 5.0, rk3= 5.0,\n/'''
                 .format(int(atomdict['_pp_c']), int(atomdict['_pp_ca']), int(atomdict['_pp_n']), int(atomdict['_pp_cm']),
                         phir2limit(phi, 10.0, ss), phir3limit(phi, 10.0, ss), str(rname[0])))
         if psi is not None:
             print('''# {6} psi
 &rst iat=  {0},  {1},  {2},  {3},
 r1=-180.0, r2={4:.2f}, r3={5:.2f}, r4= 180.0,
-rk2= 2.0, rk3= 2.0,\n/'''
+rk2= 5.0, rk3= 5.0,\n/'''
                 .format(int(atomdict['_pp_np']), int(atomdict['_pp_c']), int(atomdict['_pp_ca']), int(atomdict['_pp_n']),
                         psir2limit(psi, 10.0, ss), psir3limit(psi, 10.0, ss), str(rname[0])))
         if chi1 is not None:
@@ -413,7 +437,7 @@ rk2= 2.0, rk3= 2.0,\n/'''
                         r2limit(chi1, 10.0), r3limit(chi1, 10.0), str(rname[0])))
 
 
-def get_raw_distances(names='', state=1, selection='all', amber=0, gro=0, label='ID', quiet=1):
+def get_raw_distances(names='', state=1, selection='all', fc=2.0, amber=0, gro=0, label='ID', quiet=1):
     '''
 DESCRIPTION
 
@@ -444,7 +468,7 @@ SEE ALSO
     '''
     from chempy import cpv
 
-    state, quiet = int(state), int(quiet)
+    state, quiet, fc = int(state), int(quiet), float(fc)
     if state < 1:
         state = cmd.get_state()
 
@@ -490,11 +514,11 @@ SEE ALSO
    iat={6}, {7},
    r1=0, r2=0.5,
    r3={8:.2f}, r4=8,
-   rk2=1.0, rk3=1.0,
+   rk2={9}, rk3={9},
 /""".format(str(i[0][1]), str(i[0][2]), str(i[0][3]),
            str(i[1][1]), str(i[1][2]), str(i[1][3]),
            str(i[0][4]), str(i[1][4]),
-           float(i[2])))
+           float(i[2]), float(fc)))
 
     # for generate GROMACS MD restraint file.
     if(int(gro)):
