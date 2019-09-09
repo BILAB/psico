@@ -266,7 +266,7 @@ ARGUMENTS
 
 
 
-def print_dihedrals(selection='sele', state=1, quiet=1, ss='', label='ID'):
+def print_dihedrals(selection='sele', state=1, quiet=1, ss='', fc=10.0, chi=0, label='ID'):
     '''
 DESCRIPTION
 
@@ -282,6 +282,12 @@ ARGUMENTS
     amber = integer: generate AMBER rst file {default: 1;ON}
 
     label = string: label type ('ID' or 'index') {default: ID}
+
+    fc = float: force constant for the dihedral angles {default: 10.0}
+
+    chi = 0: Do not print chi angles (default)
+    chi = 1: print chi1 dihedral angle (if exists)
+    chi = 2: print chi1 and chi2 dihedral angles (if exists) (not implemented yet)
 
 SEE ALSO
 
@@ -357,7 +363,7 @@ SEE ALSO
                     val = -180.0
                 return val
             elif ss == 'alpha':
-                val = -100.0
+                val = -80.0
                 return val
             elif ss == 'beta':
                 val = -180.0
@@ -370,7 +376,7 @@ SEE ALSO
                     val = 180.0
                 return val
             elif ss == 'alpha':
-                val = -45.0
+                val = -50.0
                 return val
             elif ss == 'beta':
                 val = -90.0
@@ -383,7 +389,7 @@ SEE ALSO
                     val = -180.0
                 return val
             elif ss == 'alpha':
-                val = -60.0
+                val = -55.0
                 return val
             elif ss == 'beta':
                 val = 90.0
@@ -396,7 +402,7 @@ SEE ALSO
                     val = 180.0
                 return val
             elif ss == 'alpha':
-                val = -20.0
+                val = -25.0
                 return val
             elif ss == 'beta':
                 val = 180.0
@@ -418,23 +424,23 @@ SEE ALSO
             print('''# {6} phi
 &rst iat=  {0},  {1},  {2},  {3},
 r1=-180.0, r2={4:.2f}, r3={5:.2f}, r4= 180.0,
-rk2= 5.0, rk3= 5.0,\n/'''
+rk2= {7}, rk3= {7},\n/'''
                 .format(int(atomdict['_pp_c']), int(atomdict['_pp_ca']), int(atomdict['_pp_n']), int(atomdict['_pp_cm']),
-                        phir2limit(phi, 10.0, ss), phir3limit(phi, 10.0, ss), str(rname[0])))
+                        phir2limit(phi, 10.0, ss), phir3limit(phi, 10.0, ss), str(rname[0]), float(fc)))
         if psi is not None:
             print('''# {6} psi
 &rst iat=  {0},  {1},  {2},  {3},
 r1=-180.0, r2={4:.2f}, r3={5:.2f}, r4= 180.0,
-rk2= 5.0, rk3= 5.0,\n/'''
+rk2= {7}, rk3= {7},\n/'''
                 .format(int(atomdict['_pp_np']), int(atomdict['_pp_c']), int(atomdict['_pp_ca']), int(atomdict['_pp_n']),
-                        psir2limit(psi, 10.0, ss), psir3limit(psi, 10.0, ss), str(rname[0])))
-        if chi1 is not None:
+                        psir2limit(psi, 10.0, ss), psir3limit(psi, 10.0, ss), str(rname[0]), float(fc)))
+        if (chi > 0) and (chi1 is not None):
             print('''# {6} chi1
 &rst iat=  {0},  {1},  {2},  {3},
 r1=-180.0, r2={4:.2f}, r3={5:.2f}, r4= 180.0,
-rk2= 2.0, rk3= 2.0,\n/'''
+rk2= {7}, rk3= {7},\n/'''
                 .format(int(atomdict['_pp_cg']), int(atomdict['_pp_cb']), int(atomdict['_pp_ca']), int(atomdict['_pp_n']),
-                        r2limit(chi1, 10.0), r3limit(chi1, 10.0), str(rname[0])))
+                        r2limit(chi1, 10.0), r3limit(chi1, 10.0), str(rname[0]), float(fc)))
 
 
 def get_raw_distances(names='', state=1, selection='all', fc=2.0, amber=0, gro=0, label='ID', quiet=1):
