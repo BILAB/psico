@@ -366,7 +366,7 @@ SEE ALSO
                 val = -80.0
                 return val
             elif ss == 'beta':
-                val = -180.0
+                val = -155.0
                 return val
 
         def phir3limit(x, sigma, ss):
@@ -379,7 +379,7 @@ SEE ALSO
                 val = -50.0
                 return val
             elif ss == 'beta':
-                val = -90.0
+                val = -125.0
                 return val
 
         def psir2limit(x, sigma, ss):
@@ -392,7 +392,7 @@ SEE ALSO
                 val = -55.0
                 return val
             elif ss == 'beta':
-                val = 90.0
+                val = 115.0
                 return val
 
         def psir3limit(x, sigma, ss):
@@ -405,7 +405,7 @@ SEE ALSO
                 val = -25.0
                 return val
             elif ss == 'beta':
-                val = 180.0
+                val = 145.0
                 return val
 
         def r2limit(x, sigma):
