@@ -294,6 +294,7 @@ SEE ALSO
     phipsi
     '''
     # selectionからCalpha原子のIDリストを取得
+    chi = int(chi)
     caindex = []
     cmd.iterate('bycalpha (%s)'%selection, 'caindex.append(ID)', space=locals())
     # Calpha原子が属する残基ごとに処理を行う
