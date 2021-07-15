@@ -41,6 +41,7 @@ __all__ = [
     'msms',
     'nma',
     'plotting',
+    'pymol_silent',
     'querying',
     'selecting',
     'setting',
