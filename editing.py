@@ -296,7 +296,7 @@ SEE ALSO
 
     if exe == '':
         from . import which
-        os.environ["PATH"] = "/usr/local/bin:$PATH"
+        os.environ["PATH"] = "/usr/local/bin:/opt/homebrew/opt/bin:$PATH"
         exe = which('dsspcmbi', 'dssp', 'dssp-2', 'mkdssp')
     ss_map = {
         'B': 'S', # residue in isolated beta-bridge
